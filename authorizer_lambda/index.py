@@ -5,18 +5,34 @@ def lambda_handler(event, context):
     # Logic to validate token (e.g., JWT verification)
     is_authorized = (token == "secret-token")
     effect = "Allow" if is_authorized else "Deny"
-    context = {
-        "principalId": "user",
-        "policyDocument": {
-            "Version": "2012-10-17",
-            "Statement": 
-            {
-                "Action": "execute-api:Invoke",
-                "Effect": "Allow",
-                "Resource": ""
+    context = None
+    if effect == "Allow":
+        context = {
+            "principalId": "user",
+            "policyDocument": {
+                "Version": "2012-10-17",
+                "Statement": 
+                {
+                    "Action": "execute-api:Invoke",
+                    "Effect": "Allow",
+                    "Resource": ""
+                }
+                
             }
-            
         }
-    }
+    else:
+        context = {
+            "principalId": "user",
+            "policyDocument": {
+                "Version": "2012-10-17",
+                "Statement": 
+                {
+                    "Action": "execute-api:Invoke",
+                    "Effect": "Allow",
+                    "Resource": ""
+                }
+                
+            }
+        }
 
     return context

@@ -40,7 +40,13 @@ $ pip install -r requirements.txt
 At this point you can now synthesize the CloudFormation template for this code.
 
 ```
-$ cdk synth
+$ cdk synth --no-staging
+```
+
+Then, run the AWS cloud app locally using the AWS SAM CLI.
+
+```
+$ sam local invoke MyTestLambda --no-event -t ./cdk.out/AwsCdkCustomAuthorizerTemplateStack.template.json
 ```
 
 To add additional dependencies, for example other CDK libraries, just add

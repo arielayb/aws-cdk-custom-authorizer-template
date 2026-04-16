@@ -30,14 +30,6 @@ class AwsCdkCustomAuthorizerTemplateStack(Stack):
         api = apigateway.RestApi(self, "MyRestApi")
         resource = api.root.add_resource("secure-data")
 
-        # 4. Apply Authorizer to Method
-        resource.add_method(
-            http_method="GET",
-            integration=apigateway.MockIntegration(), # Replace with your real integration
-            authorizer=authorizer,
-            authorization_type=apigateway.AuthorizationType.CUSTOM
-        )
-
         # Define the Lambda function
         my_test_lambda = _lambda.Function(
             self, "MyTestLambda",
@@ -45,3 +37,24 @@ class AwsCdkCustomAuthorizerTemplateStack(Stack):
             code=_lambda.Code.from_asset("lambdas/test_lambda"), # Path to your lambda directory
             handler="index.lambda_handler" # filename.functionname
         )
+
+        # 4. Apply Authorizer to Method
+        resource.add_method(
+            http_method="GET",
+            integration=apigateway.LambdaIntegration(
+            my_test_lambda,
+            proxy=False,
+            integration_responses=[
+                apigateway.IntegrationResponse(
+                        status_code="200",
+                        response_parameters={
+                            'method.response.header.Access-Control-Allow-Origin': "'*'"
+                        }
+                    )
+                ]
+            ),
+            authorizer=authorizer,
+            authorization_type=apigateway.AuthorizationType.CUSTOM
+        )
+
+

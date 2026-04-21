@@ -1,0 +1,407 @@
+Resources:
+  AuthHandlerServiceRoleD970A3A9:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Fn::Join:
+        - ''
+        - - 'arn:'
+          - Ref: AWS::Partition
+          - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/AuthHandler/ServiceRole/Resource
+  AuthHandler9DC767B7:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code: AuthHandler9DC767B7
+      Handler: index.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - AuthHandlerServiceRoleD970A3A9
+        - Arn
+      Runtime: python3.11
+    DependsOn:
+    - AuthHandlerServiceRoleD970A3A9
+    Metadata:
+      SamNormalized: true
+      SamResourceId: AuthHandler
+      aws:asset:is-bundled: false
+      aws:asset:path: ../../asset.cfdaccd1696b0fee1db9cd30c608c2282947391da5c57310616c764ce1779f98
+      aws:asset:property: Code
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/AuthHandler/Resource
+  AuthHandlerLogGroup2837CE3F:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Join:
+        - ''
+        - - /aws/lambda/
+          - Ref: AuthHandler9DC767B7
+      RetentionInDays: 731
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/AuthHandler/LogGroup/Resource
+  AuthHandlerAwsCdkCustomAuthorizerTemplateStackMyAuthorizer5B337D0BPermissions362C02D6:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - AuthHandler9DC767B7
+        - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+        - ''
+        - - 'arn:'
+          - Ref: AWS::Partition
+          - ':execute-api:'
+          - Ref: AWS::Region
+          - ':'
+          - Ref: AWS::AccountId
+          - ':'
+          - Ref: MyRestApi2D1F47A9
+          - /authorizers/
+          - Ref: MyAuthorizer6575980E
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/AuthHandler/AwsCdkCustomAuthorizerTemplateStackMyAuthorizer5B337D0B:Permissions
+  MyAuthorizer6575980E:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      AuthorizerResultTtlInSeconds: 300
+      AuthorizerUri:
+        Fn::Join:
+        - ''
+        - - 'arn:'
+          - Fn::Select:
+            - 1
+            - Fn::Split:
+              - ':'
+              - Fn::GetAtt:
+                - AuthHandler9DC767B7
+                - Arn
+          - ':apigateway:'
+          - Fn::Select:
+            - 3
+            - Fn::Split:
+              - ':'
+              - Fn::GetAtt:
+                - AuthHandler9DC767B7
+                - Arn
+          - :lambda:path/2015-03-31/functions/
+          - Fn::GetAtt:
+            - AuthHandler9DC767B7
+            - Arn
+          - /invocations
+      IdentitySource: method.request.header.Authorization
+      Name: AwsCdkCustomAuthorizerTemplateStackMyAuthorizer5B337D0B
+      RestApiId:
+        Ref: MyRestApi2D1F47A9
+      Type: TOKEN
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/MyAuthorizer/Resource
+  MyRestApi2D1F47A9:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: MyRestApi
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/MyRestApi/Resource
+  MyRestApiDeploymentB555B582976578dbd28612c73beeb090ef35d3b4:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      Description: Automatically created by the RestApi construct
+      RestApiId:
+        Ref: MyRestApi2D1F47A9
+    DependsOn:
+    - MyAuthorizer6575980E
+    - MyRestApisecuredataGET6C7B46CE
+    - MyRestApisecuredata5A487CD2
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/MyRestApi/Deployment/Resource
+      aws:cdk:do-not-refactor: true
+  MyRestApiDeploymentStageprodC33B8E5F:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      DeploymentId:
+        Ref: MyRestApiDeploymentB555B582976578dbd28612c73beeb090ef35d3b4
+      RestApiId:
+        Ref: MyRestApi2D1F47A9
+      StageName: prod
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/MyRestApi/DeploymentStage.prod/Resource
+  MyRestApisecuredata5A487CD2:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId:
+        Fn::GetAtt:
+        - MyRestApi2D1F47A9
+        - RootResourceId
+      PathPart: secure-data
+      RestApiId:
+        Ref: MyRestApi2D1F47A9
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/MyRestApi/Default/secure-data/Resource
+  MyRestApisecuredataGETApiPermissionAwsCdkCustomAuthorizerTemplateStackMyRestApiCD4A263DGETsecuredata0DE7329B:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - MyTestLambdaE58C6038
+        - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+        - ''
+        - - 'arn:'
+          - Ref: AWS::Partition
+          - ':execute-api:'
+          - Ref: AWS::Region
+          - ':'
+          - Ref: AWS::AccountId
+          - ':'
+          - Ref: MyRestApi2D1F47A9
+          - /
+          - Ref: MyRestApiDeploymentStageprodC33B8E5F
+          - /GET/secure-data
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/MyRestApi/Default/secure-data/GET/ApiPermission.AwsCdkCustomAuthorizerTemplateStackMyRestApiCD4A263D.GET..secure-data
+  MyRestApisecuredataGETApiPermissionTestAwsCdkCustomAuthorizerTemplateStackMyRestApiCD4A263DGETsecuredata09A6305A:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - MyTestLambdaE58C6038
+        - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+        - ''
+        - - 'arn:'
+          - Ref: AWS::Partition
+          - ':execute-api:'
+          - Ref: AWS::Region
+          - ':'
+          - Ref: AWS::AccountId
+          - ':'
+          - Ref: MyRestApi2D1F47A9
+          - /test-invoke-stage/GET/secure-data
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/MyRestApi/Default/secure-data/GET/ApiPermission.Test.AwsCdkCustomAuthorizerTemplateStackMyRestApiCD4A263D.GET..secure-data
+  MyRestApisecuredataGET6C7B46CE:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: CUSTOM
+      AuthorizerId:
+        Ref: MyAuthorizer6575980E
+      HttpMethod: GET
+      Integration:
+        IntegrationHttpMethod: POST
+        IntegrationResponses:
+        - ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: '''*'''
+          StatusCode: '200'
+        Type: AWS
+        Uri:
+          Fn::Join:
+          - ''
+          - - 'arn:'
+            - Ref: AWS::Partition
+            - ':apigateway:'
+            - Ref: AWS::Region
+            - :lambda:path/2015-03-31/functions/
+            - Fn::GetAtt:
+              - MyTestLambdaE58C6038
+              - Arn
+            - /invocations
+      ResourceId:
+        Ref: MyRestApisecuredata5A487CD2
+      RestApiId:
+        Ref: MyRestApi2D1F47A9
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/MyRestApi/Default/secure-data/GET/Resource
+  MyTestLambdaServiceRoleA758890D:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - Fn::Join:
+        - ''
+        - - 'arn:'
+          - Ref: AWS::Partition
+          - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/MyTestLambda/ServiceRole/Resource
+  MyTestLambdaE58C6038:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code: MyTestLambdaE58C6038
+      Handler: index.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - MyTestLambdaServiceRoleA758890D
+        - Arn
+      Runtime: python3.12
+    DependsOn:
+    - MyTestLambdaServiceRoleA758890D
+    Metadata:
+      SamNormalized: true
+      SamResourceId: MyTestLambda
+      aws:asset:is-bundled: false
+      aws:asset:path: ../../asset.27fca650a9896755cae5f0d61323b58bde48a43c9c4db0e00e2dd45ceb92c6c7
+      aws:asset:property: Code
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/MyTestLambda/Resource
+  MyTestLambdaLogGroupCE964118:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Join:
+        - ''
+        - - /aws/lambda/
+          - Ref: MyTestLambdaE58C6038
+      RetentionInDays: 731
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/MyTestLambda/LogGroup/Resource
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAA/71TTY/TMBD9LevjyjWwW3HoLQWBkPioSm9VtZq1h3RoYlu2o1WI8t+xHSetxAUunOx5M/Nm/Gb8IB7Wb8XrO3jxK6kuq4aexfA9gLzwCD0NDbTPCsTwodMykNHHgUmjkG3YPePsDFo16IrlOh2onXwj/9vAE3/3Q8/06b5D15L30Ro5QSuGvWkw1gXvuxbVtmebgVlHWpKFppLSRLrCPMWkhCrzlV5YCxpqVDvTkCT0bBP5brG+ciX2lDr/X6Xy2xPFyP3jU2TE4EWVjmiLbScvGLbg8Zgr3rMTb0ztxfDZ1B+d6Wykbsr1K9wo/yeYK81pIwdLNQR8gV4MB3NBXXXhbBz9QnfMdWL0FeJ79KGytLiKzd+jbUzfog6xE4VeOrKLFlEiS/PEMQDpa7hfWgWlDiY2RhKaTyqpVUbwL3hu6srO4wLXmFuaoRsVsjM9yXRO4izvaUFingWHy6AthPMO3C3FHMq/YNRIxQxXkHnfQ7CTrwCkA9YObsQxWSmfNgyK0tl96O3MAssEptpT8Yl3HHlelPQa0nVyfOuC7cLId30M0K8exZu1WN/99ESr8uPEfjp/A1bBym72AwAA
+    Metadata:
+      aws:cdk:path: AwsCdkCustomAuthorizerTemplateStack/CDKMetadata/Default
+    Condition: CDKMetadataAvailable
+Outputs:
+  MyRestApiEndpoint4C55E4CB:
+    Value:
+      Fn::Join:
+      - ''
+      - - https://
+        - Ref: MyRestApi2D1F47A9
+        - .execute-api.
+        - Ref: AWS::Region
+        - .
+        - Ref: AWS::URLSuffix
+        - /
+        - Ref: MyRestApiDeploymentStageprodC33B8E5F
+        - /
+Conditions:
+  CDKMetadataAvailable:
+    Fn::Or:
+    - Fn::Or:
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - af-south-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - ap-east-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - ap-northeast-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - ap-northeast-2
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - ap-northeast-3
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - ap-south-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - ap-south-2
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - ap-southeast-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - ap-southeast-2
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - ap-southeast-3
+    - Fn::Or:
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - ap-southeast-4
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - ca-central-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - ca-west-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - cn-north-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - cn-northwest-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - eu-central-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - eu-central-2
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - eu-north-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - eu-south-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - eu-south-2
+    - Fn::Or:
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - eu-west-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - eu-west-2
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - eu-west-3
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - il-central-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - me-central-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - me-south-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - sa-east-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - us-east-1
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - us-east-2
+      - Fn::Equals:
+        - Ref: AWS::Region
+        - us-west-1
+    - Fn::Equals:
+      - Ref: AWS::Region
+      - us-west-2
+Parameters:
+  BootstrapVersion:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: Version of the CDK Bootstrap resources in this environment, automatically
+      retrieved from SSM Parameter Store. [cdk:skip]
